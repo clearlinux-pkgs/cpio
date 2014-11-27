@@ -1,0 +1,114 @@
+From f6a8a2cbd2d5ca40ea94900b55b845dd5ca87328 Mon Sep 17 00:00:00 2001
+From: Sergey Poznyakoff <gray@gnu.org.ua>
+Date: Thu, 11 Dec 2014 13:21:40 +0000
+Subject: Fix symlink-bad-length test for 64-bit architectures.
+
+* src/util.c: Return non-zero exit code if EOF is hit prematurely.
+* tests/symlink-bad-length.at: Revert to original archive: there's
+no use testing for recovery, because that depends on the host
+architecture.  Don't test for exit code as well (same reason).
+Account for eventual warning messages.
+---
+Index: cpio-2.11/src/util.c
+===================================================================
+--- cpio-2.11.orig/src/util.c	2015-03-12 17:55:46.843625263 +0000
++++ cpio-2.11/src/util.c	2015-03-12 17:55:46.839625263 +0000
+@@ -206,10 +206,7 @@
+   if (input_size < 0)
+     error (1, errno, _("read error"));
+   if (input_size == 0)
+-    {
+-      error (0, 0, _("premature end of file"));
+-      exit (1);
+-    }
++    error (PAXEXIT_FAILURE, 0, _("premature end of file"));
+   input_bytes += input_size;
+ }
+ 
+Index: cpio-2.11/tests/symlink-bad-length.at
+===================================================================
+--- cpio-2.11.orig/tests/symlink-bad-length.at	2015-03-12 17:55:46.819625262 +0000
++++ cpio-2.11/tests/symlink-bad-length.at	2015-03-12 17:54:55.000000000 +0000
+@@ -35,64 +35,30 @@
+ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+ ])
+ 
+-AT_CHECK([
+-base64 -d ARCHIVE.base64 > ARCHIVE || AT_SKIP_TEST
+-cpio -ntv < ARCHIVE
+-test $? -eq 2
+-],
+-[0],
+-[-rw-rw-r--   1 10029    10031          13 Nov 25 13:52 FILE
+-],[cpio: LINK: stored filename length is out of range
+-cpio: premature end of file
+-])
+-
+-AT_CLEANUP
+-# Process this file with autom4te to create testsuite.  -*- Autotest -*-
+-# Copyright (C) 2014 Free Software Foundation, Inc.
++# The exact error message and exit status depend on the host architecture,
++# therefore strderr is filtered out and error code is not checked.
+ 
+-# This program is free software; you can redistribute it and/or modify
+-# it under the terms of the GNU General Public License as published by
+-# the Free Software Foundation; either version 3, or (at your option)
+-# any later version.
+-
+-# This program is distributed in the hope that it will be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-# GNU General Public License for more details.
+-
+-# You should have received a copy of the GNU General Public License
+-# along with this program; if not, write to the Free Software
+-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+-# 02110-1301 USA.
+-
+-# Cpio v2.11 did segfault with badly set symlink length.
+-# References:
+-# http://lists.gnu.org/archive/html/bug-cpio/2014-11/msg00007.html
+-
+-AT_SETUP([symlink-bad-length])
+-AT_KEYWORDS([symlink-long copyout])
+-
+-AT_DATA([ARCHIVE.base64],
+-[x3EjAIBAtIEtJy8nAQAAAHRUYW0FAAAADQBGSUxFAABzb21lIGNvbnRlbnQKAMdxIwBgQ/+hLScv
+-JwEAAAB0VEhuBQD/////TElOSwAARklMRcdxAAAAAAAAAAAAAAEAAAAAAAAACwAAAAAAVFJBSUxF
+-UiEhIQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+-])
++# So far the only case when cpio would exit with code 0 is when it skips
++# several bytes and encounters a valid record header.  Perhaps it should
++# exit with code 2 (non-critical error), if at least one byte was skipped,
++# but that could hurt backward compatibility.
+ 
+ AT_CHECK([
+ base64 -d ARCHIVE.base64 > ARCHIVE || AT_SKIP_TEST
+-cpio -ntv < ARCHIVE
+-test $? -eq 2
++TZ=UTC cpio -ntv < ARCHIVE 2>stderr 
++cat stderr | grep -v \
++    -e 'stored filename length is out of range' \
++    -e 'premature end of file' \
++    -e 'archive header has reverse byte-order' \
++    -e 'memory exhausted' \
++    -e 'skipped [[0-9][0-9]*] bytes of junk' \
++    -e '[[0-9][0-9]*] block' \
++    >&2
++echo >&2 STDERR
+ ],
+ [0],
+-[-rw-rw-r--   1 10029    10031          13 Nov 25 13:52 FILE
+-],[cpio: LINK: stored filename length is out of range
+-cpio: premature end of file
++[-rw-rw-r--   1 10029    10031          13 Nov 25 11:52 FILE
++],[STDERR
+ ])
+ 
+ AT_CLEANUP

@@ -4,7 +4,7 @@
 #
 Name     : cpio
 Version  : 2.12
-Release  : 17
+Release  : 18
 URL      : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
 Source0  : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
 Summary  : No detailed summary available
@@ -14,6 +14,7 @@ Requires: cpio-bin
 Requires: cpio-doc
 Requires: cpio-locales
 BuildRequires : bison
+Patch1: cve-2016-2037.patch
 
 %description
 This is the GNU cpio package
@@ -47,6 +48,7 @@ locales components for the cpio package.
 
 %prep
 %setup -q -n cpio-2.12
+%patch1 -p1
 
 %build
 %configure --disable-static

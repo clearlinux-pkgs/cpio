@@ -4,7 +4,7 @@
 #
 Name     : cpio
 Version  : 2.12
-Release  : 18
+Release  : 19
 URL      : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
 Source0  : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
 Summary  : No detailed summary available
@@ -77,7 +77,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc /usr/share/info/*
 %doc /usr/share/man/man1/*
-%doc /usr/share/man/man8/*
+%exclude /usr/share/man/man8/rmt.8
 
 %files locales -f cpio.lang 
 %defattr(-,root,root,-)

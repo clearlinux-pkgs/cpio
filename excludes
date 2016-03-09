@@ -1,4 +1,4 @@
 # This file contains the output files that need %exclude. Full path
 # names, one per line.
 /usr/libexec/rmt
-
+/usr/share/man/man8/rmt.8

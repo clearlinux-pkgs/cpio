@@ -6,7 +6,7 @@
 #
 Name     : cpio
 Version  : 2.12
-Release  : 25
+Release  : 26
 URL      : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
 Source0  : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
 Source99 : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2.sig
@@ -89,11 +89,14 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1557076289
-export CFLAGS="$CFLAGS -fcf-protection=full -fno-lto -fstack-protector-strong "
-export FCFLAGS="$CFLAGS -fcf-protection=full -fno-lto -fstack-protector-strong "
-export FFLAGS="$CFLAGS -fcf-protection=full -fno-lto -fstack-protector-strong "
-export CXXFLAGS="$CXXFLAGS -fcf-protection=full -fno-lto -fstack-protector-strong "
+export SOURCE_DATE_EPOCH=1557076657
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fcf-protection=full -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong "
+export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fcf-protection=full -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong "
+export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fcf-protection=full -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong "
+export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -fcf-protection=full -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong "
 %configure --disable-static
 make  %{?_smp_mflags}
 
@@ -105,7 +108,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1557076289
+export SOURCE_DATE_EPOCH=1557076657
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/cpio
 cp COPYING %{buildroot}/usr/share/package-licenses/cpio/COPYING

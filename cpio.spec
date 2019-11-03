@@ -6,7 +6,7 @@
 #
 Name     : cpio
 Version  : 2.12
-Release  : 26
+Release  : 27
 URL      : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
 Source0  : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
 Source99 : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2.sig

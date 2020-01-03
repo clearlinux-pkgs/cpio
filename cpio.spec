@@ -5,11 +5,11 @@
 # Source0 file verified with key 0x3602B07F55D0C732 (gray@gnu.org)
 #
 Name     : cpio
-Version  : 2.12
-Release  : 28
-URL      : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
-Source0  : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2
-Source1 : http://mirrors.kernel.org/gnu/cpio/cpio-2.12.tar.bz2.sig
+Version  : 2.13
+Release  : 29
+URL      : http://mirrors.kernel.org/gnu/cpio/cpio-2.13.tar.gz
+Source0  : http://mirrors.kernel.org/gnu/cpio/cpio-2.13.tar.gz
+Source1  : http://mirrors.kernel.org/gnu/cpio/cpio-2.13.tar.gz.sig
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : GPL-3.0 GPL-3.0+
@@ -20,7 +20,6 @@ Requires: cpio-locales = %{version}-%{release}
 Requires: cpio-man = %{version}-%{release}
 BuildRequires : bison
 BuildRequires : glibc-locale
-Patch1: cve-2016-2037.patch
 
 %description
 This is the GNU cpio package
@@ -70,16 +69,15 @@ man components for the cpio package.
 
 
 %prep
-%setup -q -n cpio-2.12
-cd %{_builddir}/cpio-2.12
-%patch1 -p1
+%setup -q -n cpio-2.13
+cd %{_builddir}/cpio-2.13
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1573771471
+export SOURCE_DATE_EPOCH=1578077430
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -99,10 +97,10 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1573771471
+export SOURCE_DATE_EPOCH=1578077430
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/cpio
-cp %{_builddir}/cpio-2.12/COPYING %{buildroot}/usr/share/package-licenses/cpio/842745cb706f8f2126506f544492f7a80dbe29b3
+cp %{_builddir}/cpio-2.13/COPYING %{buildroot}/usr/share/package-licenses/cpio/842745cb706f8f2126506f544492f7a80dbe29b3
 %make_install
 %find_lang cpio
 ## Remove excluded files

@@ -1,4 +1,3 @@
-Configure miss: whether sys/types.h defines makedev
 Configure miss: linewrap.h
 Configure miss: sys/inet.h
 Configure miss: sys/gentape.h
@@ -7,7 +6,9 @@ Configure miss: sys/device.h
 Configure miss: sys/tprintf.h
 Configure miss: sys/io/trioctl.h
 Configure miss: whether getcwd aborts when 4k < cwd_length < 16k
+Configure miss: __mktime_internal
 Configure miss: obstacks that work with any size object
+Configure miss: timezone_t
 Configure miss: sys/buf.h
 Configure miss: process.h usability
 Configure miss: process.h presence

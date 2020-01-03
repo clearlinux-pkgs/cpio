@@ -1,3 +1,226 @@
+2019-11-06  Sergey Poznyakoff  <gray@gnu.org>
+
+	Version 2.13
+
+	* NEWS: Describe new version.
+	* configure.ac: version 2.13
+	* src/copyin.c: Fix strict aliasing violation.
+	* tests/CVE-2019-14866.at: New file.
+	* tests/Makefile.am: Add new test.
+	* tests/testsuite.at: Add new test,
+
+2019-11-04  Sergey Poznyakoff  <gray@gnu.org>
+
+	Various fixes
+
+	* doc/cpio.texi: Document URLs of the mailing list archive and
+	subscription interface.
+	* src/copyin.c (try_existing_file): Change type of the last
+	argument.
+	(copyin_file): Initialize existing_dir.
+	* src/dstring.c: Include xalloc.h
+	* src/filemode.c (mode_string): mode is unsigned int.
+
+2019-11-04  Sergey Poznyakoff  <gray@gnu.org>
+
+	Get rid of the unnecessary workaround.
+
+2019-11-04  Sergey Poznyakoff  <gray@gnu.org>
+
+	Don't repeat the help reference message.
+
+	* src/main.c (process_args): Don't specify the "Try cpio --help"
+	message explicitly. It is added automatically by the USAGE_ERROR
+	macro.
+
+2019-11-04  Sergey Poznyakoff  <gray@gnu.org>
+
+	Fix CVE-2019-14866
+
+	* src/copyout.c (to_ascii): Additional argument nul controls
+	whether
+	to add the terminating nul character.
+	(field_width_error): Improve diagnostics: print the actual and the
+	maximum allowed field value.
+	* src/extern.h (to_ascii, field_width_error): New prototypes.
+	* src/tar.c (to_oct): Remove.
+	(to_oct_or_error): New function.
+	(TO_OCT): New macro.
+	(write_out_tar_header): Use TO_OCT and to_ascii. Return 0 on
+	success, 1 on error.
+
+2019-11-03  Sergey Poznyakoff  <gray@gnu.org>
+
+	Fix CVE-2015-1197
+
+	* src/copyin.c (copyin_link): Force safer name suffix for
+	symbolic links.
+	* tests/CVE-2015-1197.at: New file.
+	* tests/Makefile.am: Add new test case.
+	* tests/testsuite.at: Likewise.
+
+2019-11-03  Sergey Poznyakoff  <gray@gnu.org>
+
+	Provide functions for struct cpio_file_stat management.
+
+	* src/copyin.c (long_format): Mark unchangeable argument as const.
+	(read_name_from_file): Use cpio_realloc_c_name.
+	(process_copy_in): Use CPIO_FILE_STAT_INITIALIZER.
+	Call cpio_file_stat_free before return.
+	* src/copyout.c (process_copy_out): Likewise.
+	* src/copypass.c (link_to_name): Mark unchangeable argument
+	as const.
+	* src/cpiohdr.h (cpio_file_stat) <c_name_buflen>: New member,
+	<c_tar_linkname>: Mark as const.
+	(CPIO_FILE_STAT_INITIALIZER): New define.
+	(cpio_file_stat_init,cpio_file_stat_free)
+	(cpio_realloc_c_name): New protos.
+	* src/extern.h: Fix prototypes.
+	* src/makepath.c (make_path): Mark unchangeable argument as const.
+	* src/util.c (create_all_directories): Mark unchangeable argument
+	as const.
+	(cpio_realloc_c_name): New function.
+	(cpio_set_c_name): Use cpio_realloc_c_name.
+	(cpio_file_stat_init,cpio_file_stat_free): New functions.
+
+2019-11-03  Sergey Poznyakoff  <gray@gnu.org>
+
+	Remove HPUX CDF support
+
+2019-01-15  Sergey Poznyakoff  <gray@gnu.org>
+
+	Minor fix in the testsuite
+
+	* tests/symlink-long.at: Use m4 to create dirname, instead of
+	using bash-specific syntax.
+
+2018-12-01  Sergey Poznyakoff  <gray@gnu.org>
+
+	Minor fixes
+
+	* src/copyin.c: Remove unused variable.
+	* src/util.c: Cast arguments to printf.
+
+2018-12-01  Sergey Poznyakoff  <gray@gnu.org>
+
+	Fix sigfault when appending to archive
+
+	Bug reported by Ross Burton. See
+	<http://lists.gnu.org/archive/html/bug-cpio/2018-11/msg00000.html>
+
+	* src/util.c: Keep static copy of the buffer pointer; always
+	assign it to file_hdr->c_name. Use x2realloc for memory
+	management.
+
+2018-06-21  Sergey Poznyakoff  <gray@gnu.org>
+
+	Fix man markup
+
+2017-04-14  Pavel Raiskup  <praiskup@redhat.com>
+
+	CVE-2016-2037 - 1 byte out-of-bounds write
+
+	Ensure that cpio_safer_name_suffix always works with dynamically
+	allocated buffer, and that it has size of at least 32 bytes.
+	Then, any call to cpio_safer_name_suffix is safe (it requires at
+	least 2 bytes in the buffer).
+
+	Also ensure that c_namesize is always correctly initialized (by
+	cpio_set_c_name) to avoid undefined behavior when reading
+	file_hdr.c_namesize (previously happened for tar archives).
+
+	References:
+	http://www.mail-archive.com/bug-cpio@gnu.org/msg00545.html
+
+	* src/copyin.c (query_rename): Drop the hack, as we now work with
+	dynamically allocated buffer.  Use cpio_set_c_name.
+	(create_defered_links_to_skipped): Use cpio_set_c_name rather than
+	manual assignment.
+	(read_name_from_file): New function to avoid C&P.
+	(read_in_old_ascii, read_in_new_ascii, read_in_binary): Use
+	read_name_from_file.
+	(process_copy_in): Initialize file_hdr.c_namesize.
+	* src/copyout.c (process_copy_out): Use cpio_set_c_name.
+	* src/cpiohdr.h (cpio_set_c_name): New prototype.
+	* src/tar.c (read_in_tar_header): Use cpio_set_c_name.
+	* src/util.c (cpio_set_c_name): New function to set
+	file_hdr->c_name and c_namesize from arbitrary string.
+	(cpio_safer_name_suffix): Some docs fixes.
+	* tests/inout.at: Also test copy-in, and try various formats.
+
+2017-02-06  Pavel Raiskup  <praiskup@redhat.com>
+
+	build: lint warnings in --device-independent
+
+	Complements: 3945f9db44c935608caa5f0
+
+	* src/util.c (find_inode_val): Drop unused variable.
+	(get_inode_and_dev): Function doesn't return any value, drop the
+	return value in definition.
+
+2017-01-02  Sergey Poznyakoff  <gray@gnu.org>
+
+	Update copyright years
+
+2016-11-10  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	Fix the output of UTF8 file names in verbose mode.
+
+	* am/quoting.m4: New file.
+	* configure.ac: Set default quoting style.
+	* src/copyin.c (long_format): Use quotearg.
+	(print_name_with_quoting): Remove.
+	* src/extern.h (print_name_with_quoting): Remove proto.
+
+2016-11-10  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	Update docs
+
+	* doc/cpio.texi: Prominently mention, that --absolute-file-names
+	is
+	the default.
+	* doc/cpio.1: Likewise.
+
+2016-11-10  Mike Frysinger  <vapier@gentoo.org>
+
+	fix enable_mt configure logic
+
+	In the default case, the build_mt flag is not set.  This leads
+	to an
+	error at configure time like:
+	./configure: line 26866: test: =: unary operator expected
+
+	Change to use the variable name autoconf creates for us and
+	quote it
+	so we never get weird expansion errors.
+
+2016-11-10  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	Update the THANKS file.
+
+2016-11-10  grajagandev  <dmoorefo@gmail.com>
+
+	Fix signed integer overflow - big block sizes
+
+	Add test for signed integer overflow
+
+2016-11-10  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	Fix out-of-bounds read
+
+	* src/copyin.c (process_copy_in): Skip records with zero filename
+	length.
+
+2016-06-16  Pavel Raiskup  <praiskup@redhat.com>
+
+	bootstrap: fix bootstrap after clean clone
+
+	* bootstrap.conf: Reintroduce changes added by
+	c7e60954dc7945635194 and removed by cleanup in
+	0396591026410f9.
+	* lib/Makefile.am: Honor the ^pax prefix.
+	* po/POTFILES.in: Likewise.
+
 2015-09-12  Sergey Poznyakoff  <gray@gnu.org>
 
 	Version 2.12
@@ -7,17 +230,24 @@
 2015-09-01  Sergey Poznyakoff  <gray@gnu.org>
 
 	Fix generation of manual directory
+
 	* doc/Makefile.am: Change 'manual' goal.
 	* doc/gendocs.sh: New file.
 	* doc/gendocs_template: ps output is not built.
 
+2015-09-01  Sergey Poznyakoff  <gray@gnu.org>
+
 	Remove not used files
+
 	* headers/Makefile.am: Remove.
 	* headers/fnmatch.h: Remove.
 	* Makefile.am: Update.
 	* configure.ac: Update.
 
+2015-09-01  Sergey Poznyakoff  <gray@gnu.org>
+
 	Include gnulib and paxutils as submodules.
+
 	* gnulib: New submodule.
 	* paxutils: New submodule.
 	* .gitignore: Updage
@@ -34,13 +264,17 @@
 2014-12-11  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix symlink-bad-length test for 64-bit architectures.
+
 	* src/util.c: Return non-zero exit code if EOF is hit prematurely.
 	* tests/symlink-bad-length.at: Revert to original archive: there's
 	no use testing for recovery, because that depends on the host
 	architecture.  Don't test for exit code as well (same reason).
 	Account for eventual warning messages.
 
+2014-12-11  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Fix error recovery in copy-in mode
+
 	* src/copyin.c (copyin_link): Fix null dereference.
 	(read_in_header): Fix error recovery (bug introduced by
 	27e0ae55).
@@ -55,20 +289,29 @@
 2014-12-01  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Bugfix
+
 	* src/copyin.c (get_link_name): Fix range checking.
 	* tests/symlink-bad-length.at: Change expected error message.
 
+2014-12-01  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Fix memory overrun on reading improperly created link records.
+
 	See
 	http://lists.gnu.org/archive/html/bug-cpio/2014-11/msg00007.html
+
 	* src/copyin.c (get_link_name): New function.
 	(list_file, copyin_link): use get_link_name
+
 	* tests/symlink-bad-length.at: New file.
 	* tests/symlink-long.at: New file.
 	* tests/Makefile.am: Add new files.
 	* tests/testsuite.at: Likewise.
 
+2014-12-01  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	New options to create device and inode-independent archives.
+
 	* src/util.c (inode_val): New member trans_inode
 	(find_inode_val): New function.
 	(find_inode_file): Rewrite using the above.
@@ -82,6 +325,7 @@
 	* src/global.c (renumber_inodes_option)
 	(ignore_devno_option): New variables.
 	* src/main.c: Add new options.
+
 	* NEWS: Document changes.
 	* doc/cpio.1: Document new options.
 	* doc/cpio.texi: Likewise.
@@ -89,9 +333,11 @@
 2014-01-31  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix package name recognition in bootstrap.
+
 	The script logic failed if AC_INIT was split among two lines.
 	Reported
 	by Pavel.
+
 	* bootstrap (extract_package_name): Rewrite as m4 script to allow
 	for multiline AC_INIT.
 
@@ -99,7 +345,10 @@
 
 	Update copyright years.
 
+2014-01-30  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Treat UID/GID as numeric if prefixed by + (-R option)
+
 	The IDs supplied with the -R option are treated as numeric
 	(without
 	looking them up in the system database), when prefixed with +.
@@ -107,15 +356,22 @@
 	allows to force using numeric value if a user (group) with
 	a numeric
 	name exists in the database.
+
 	Reported by Joshua Briefman <sirgatez@gmail.com>.
+
 	* src/userspec.c (parse_user_spec): Use + as an indicator of
 	a numeric UID/GID.
 	* doc/cpio.1: Document changes.
 	* doc/cpio.texi: Likewise.
 
+2014-01-30  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Use exit codes consistenly.
 
+2014-01-30  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Improve documentation.
+
 	* .gitignore: Update.
 	* NEWS: Update.
 	* doc/cpio.1: Rewrite.
@@ -127,6 +383,7 @@
 2014-01-28  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Distribute rmt.8; update build system
+
 	* NEWS: Update.
 	* bootstrap (gnulib_extra_files): Remove "missing"
 	* configure.ac: Do not distribute shar archive.
@@ -142,6 +399,7 @@
 2012-02-20  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Always use 32 bit CRC
+
 	* src/cpiohdr.h (cpio_file_stat) <c_chksum>: Change type to
 	uint32_t.
 	* src/extern.h (crc): Change type to uint32_t.
@@ -152,6 +410,7 @@
 2011-09-19  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix error handling in disk_empty_output_buffer and sparse_write
+
 	* src/extern.h (delayed_seek_count): Remove.
 	(disk_empty_output_buffer): Change signature.
 	* src/util.c (disk_empty_output_buffer): Take two arguments.
@@ -165,7 +424,10 @@
 	with flush=true before closing the file.
 	* src/copypass.c (process_copy_pass): Likewise.
 
+2011-09-19  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Minor fixes.
+
 	* configure.ac: Use gettext 0.18
 	* doc/.gitignore: Add parse-datetime.texi.
 	* lib/Makefile.am (libpax_a_SOURCES): Add exit-status.c
@@ -176,6 +438,7 @@
 2010-08-09  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Bugfixes.
+
 	* gnulib.modules: Add getline, required by rmt.
 	* src/mt.c (fatal_exit): Change exit code to
 	MT_EXIT_FAILURE.
@@ -183,16 +446,23 @@
 2010-07-23  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix setstat testcases to work on Darwin.
+
 	* tests/setstat01.at: Set write permission on the directory
 	before attempting to rename it.
 	* tests/setstat02.at: Likewise.
 
+2010-07-23  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Housekeeping.
+
 	* .gitignore: Sort.
 	* src/cpiohdr.h: Fix indentation of preprocessor statements.
 	* src/filetypes.h: Likewise.
 
+2010-07-23  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Improve handling of -D in copy-pass mode.
+
 	* gnulib.modules: Add xgetcwd.
 	* src/copypass.c (process_copy_pass): Convert directory_name
 	to absolute if -D option was given.
@@ -200,24 +470,37 @@
 2010-07-22  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix bootstrapping.
+
 	* bootstrap (symlink_to_dir): Fix symlink calculation.
 
+2010-07-22  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Minor fix.
+
 	* src/filetypes.h: Remove declarations of stat and lstat.
 
+2010-07-22  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Minor fixes.
+
 	* src/copyout.c (count_defered_links_to_dev_ino): Return size_t.
 	(last_link): Do not use superfluous local variable.
 	* src/util.c (copy_files_disk_to_tape)
 	(copy_files_disk_to_disk): Shut down gcc warnings.
 
+2010-07-22  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Minor changes
+
 	* .gitignore: Update.
 	* am/.gitignore: New file.
 	* src/.gitignore: Add .gdbinit.
 	* tests/symlink-to-stdout.at: Fix keywords.
 
+2010-07-22  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Provide a tar-like --directory (-D) option.
+
 	* src/copyin.c (process_copy_in): Call change_dir.
 	* src/copyout.c (process_copy_out): Likewise.
 	* src/copypass.c (process_copy_pass): Likewise.
@@ -227,11 +510,13 @@
 	* src/main.c (options): New option --directory.
 	(parse_opt): Handle the --directory option.
 	* src/util.c (change_dir): New proto.
+
 	* doc/cpio.texi: Document the --directory option.
 
 2010-07-22  Dmitry V. Levin  <ldv@altlinux.org>
 
 	Fix --to-stdout option support
+
 	* src/copyin.c (copyin_link): Skip an appropriate number of bytes
 	when to_stdout_option flag is set.
 	* tests/symlink-to-stdout.at: New test case.
@@ -241,9 +526,13 @@
 2010-03-10  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Version 2.11
+
 	* configure.ac, NEWS: Raise version number.
 
+2010-03-10  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Bugfixes.
+
 	* src/main.c (cpio_options): Remove unused options.
 	* src/util.c (cpio_create_dir): Fix conditional.
 	* NEWS: Update.
@@ -252,6 +541,7 @@
 
 	Use same code when creating directories in copy-in and copy-pass
 	modes.
+
 	* src/copyin.c (copyin_mkdir): Remove.
 	(copyin_directory): Remove.
 	(copyin_file): Use cpio_create_dir instead
@@ -273,6 +563,7 @@
 2010-02-11  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix inode number typing.
+
 	* src/copyin.c (create_defered_links): Use ino_t for
 	inode numbers.
 	(create_defered_links_to_skipped): Likewise.
@@ -285,7 +576,10 @@
 	* src/extern.h (link_to_maj_min_ino)
 	(find_inode_file, add_inode): Change signature.
 
+2010-02-11  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Improve configuration suite.
+
 	* configure.ac: Raise version number to 2.10.91.
 	Require autotools 2.63/1.11.1.
 	Create shar archive.
@@ -294,12 +588,15 @@
 	* lib/Makefile.am (rmt-command.h): Silent rule.
 	* NEWS: Update.
 
+2010-02-11  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Update copyright years.
 
 2009-07-31  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Delay setting directory attributes until end of run, if they do
 	not permit writing. Fix debian bug #458079.
+
 	* src/copyin.c (copyin_mkdir): New function.
 	(copyin_directory): Use copyin_mkdir to create directory.
 	Call set_perms only when safe, otherwise use
@@ -313,16 +610,25 @@
 	* tests/Makefile.am (TESTSUITE_AT): Add setstat01.at and
 	setstat02.at
 	* tests/testsuite.at: Include setstat01.at and setstat02.at.
+
 	* NEWS: Update.
 
+2009-07-31  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Minor compatibility fix
+
 	* src/cpiohdr.h (struct old_cpio_header): c_dev and c_rdev
 	are unsigned short.
 
+2009-07-31  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Raise version number to 2.10.90
+
+2009-07-31  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix mt and make sure it is always build during distcheck. Minor
 	fixes in cpio.
+
 	* Makefile.am (AM_DISTCHECK_CONFIGURE_FLAGS): New variable.
 	Ensure that distcheck builds mt.
 	* bootstrap: Patch Makefile.in to honor
@@ -344,17 +650,21 @@
 	(licence): Remove. This info is output by --version.
 	(process_args): Remove useless test.
 	(main): Use set_program_name and argp_version_setup.
+
 	* src/mt.c: Remove superfluous includes.
 	Include argp-version-etc.h and progname.h
 	Use argp to parse arguments.
 	Supply the fatal_exit function.
+
 	* tests/version.at: Update for the new --version output.
+
 	* THANKS: Add Peter Breitenlohner.
 	* AUTHORS: Update Sergey's email.
 
 2009-06-22  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix bootstrap
+
 	* bootstrap: do not modify original system.h, create a copy of
 	it instead.
 
@@ -365,9 +675,13 @@
 2009-06-19  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Update docs.
+
 	* NEWS, THANKS: Update
 
+2009-06-19  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	Make sure the structs used for I/O mapping are not padded.
+
 	* am/flushleft.m4, am/pack.m4: New files.
 	* Makefile.am (ACLOCAL_AMFLAGS): Add -I am.
 	* bootstrap: Fix arguments to aclocal.
@@ -378,11 +692,13 @@
 2009-06-19  Clint Adams  <schizo@debian.org>
 
 	Improve docs
+
 	* doc/cpio.texi: Document format file size limits.
 
 2009-06-19  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Housekeeping changes
+
 	* lib/Makefile.am: New file
 	* src/Makefile.am (INCLUDES): add lib
 	* src/main.c: Include configmake.h (needed for LOCALEDIR).

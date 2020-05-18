@@ -6,7 +6,7 @@
 #
 Name     : cpio
 Version  : 2.13
-Release  : 30
+Release  : 31
 URL      : https://mirrors.kernel.org/gnu/cpio/cpio-2.13.tar.gz
 Source0  : https://mirrors.kernel.org/gnu/cpio/cpio-2.13.tar.gz
 Source1  : https://mirrors.kernel.org/gnu/cpio/cpio-2.13.tar.gz.sig
@@ -20,6 +20,7 @@ Requires: cpio-locales = %{version}-%{release}
 Requires: cpio-man = %{version}-%{release}
 BuildRequires : bison
 BuildRequires : glibc-locale
+Patch1: backport-gcc10.patch
 
 %description
 This is the GNU cpio package
@@ -71,20 +72,21 @@ man components for the cpio package.
 %prep
 %setup -q -n cpio-2.13
 cd %{_builddir}/cpio-2.13
+%patch1 -p1
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1582242602
+export SOURCE_DATE_EPOCH=1589809473
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
 export NM=gcc-nm
 export CFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
-export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
-export FFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export FCFLAGS="$FFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export FFLAGS="$FFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
 export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
 %configure --disable-static
 make  %{?_smp_mflags}
@@ -97,7 +99,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1582242602
+export SOURCE_DATE_EPOCH=1589809473
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/cpio
 cp %{_builddir}/cpio-2.13/COPYING %{buildroot}/usr/share/package-licenses/cpio/842745cb706f8f2126506f544492f7a80dbe29b3

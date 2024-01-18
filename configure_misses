@@ -1,30 +1,52 @@
 Configure miss: __mktime_internal
+Configure miss: __mktime_internal
+Configure miss: bool, true, false
 Configure miss: bool, true, false
 Configure miss: compiler option needed when checking for declarations
+Configure miss: compiler option needed when checking for declarations
 Configure miss: crtdefs.h
+Configure miss: crtdefs.h
+Configure miss: gcc option for timestamps after 2038
+Configure miss: gcc option for timestamps after 2038
 Configure miss: gcc option to enable large file support
-Configure miss: gcc option to enable timestamps after Jan 2038
+Configure miss: gcc option to enable large file support
 Configure miss: gcc options needed to detect all undeclared functions
-Configure miss: how to get the file descriptor associated with an open DIR*
+Configure miss: gcc options needed to detect all undeclared functions
+Configure miss: linewrap.h
 Configure miss: linewrap.h
 Configure miss: obstacks that work with any size object
+Configure miss: obstacks that work with any size object
+Configure miss: stdckdint.h
 Configure miss: stdckdint.h
 Configure miss: sys/buf.h
+Configure miss: sys/buf.h
+Configure miss: sys/device.h
 Configure miss: sys/device.h
 Configure miss: sys/gentape.h
+Configure miss: sys/gentape.h
+Configure miss: sys/inet.h
 Configure miss: sys/inet.h
 Configure miss: sys/io/trioctl.h
+Configure miss: sys/io/trioctl.h
+Configure miss: sys/tape.h
 Configure miss: sys/tape.h
 Configure miss: sys/tprintf.h
+Configure miss: sys/tprintf.h
+Configure miss: timezone_t
 Configure miss: timezone_t
 Configure miss: unreachable
+Configure miss: unreachable
+Configure miss: whether SEEK_DATA works but is incompatible with GNU
 Configure miss: whether SEEK_DATA works but is incompatible with GNU
 Configure miss: whether btowc is consistent with mbrtowc in the C locale
+Configure miss: whether btowc is consistent with mbrtowc in the C locale
+Configure miss: whether ctype.h defines __header_inline
 Configure miss: whether ctype.h defines __header_inline
 Configure miss: whether mbrtowc stores incomplete characters
-Configure miss: whether strtol works
-Configure miss: whether strtoll works
-Configure miss: whether strtoull works
+Configure miss: whether mbrtowc stores incomplete characters
+Configure miss: whether the compiler is clang
 Configure miss: whether the compiler is clang
 Configure miss: whether the compiler produces multi-arch binaries
+Configure miss: whether the compiler produces multi-arch binaries
+Configure miss: whether this system supports file names of any length
 Configure miss: whether this system supports file names of any length
